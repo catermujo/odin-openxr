@@ -1,8 +1,14 @@
 package openxr
 
 
+when ODIN_OS == .Windows {
+    foreign import openxr_loader "openxr_loader.lib"
+} else when ODIN_OS == .Darwin {
+    foreign import openxr_loader "libopenxr_loader.dylib"
+} else when ODIN_OS == .Linux {
+    foreign import openxr_loader "libopenxr_loader.so"
+}
 // Link just the proc address loader
-foreign import openxr_loader "openxr_loader.lib"
 foreign openxr_loader {
     @(link_name = "xrGetInstanceProcAddr")
     GetInstanceProcAddr :: proc "system" (instance: Instance, name: cstring, function: ^ProcVoidFunction) -> Result ---
