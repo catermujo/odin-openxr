@@ -28,11 +28,21 @@ linux_arch_dir() {
     esac
 }
 
+darwin_arch_dir() {
+    case "$(uname -m)" in
+        x86_64 | amd64) echo "darwin_x64" ;;
+        aarch64 | arm64) echo "darwin_arm64" ;;
+        *) echo "darwin_$(uname -m)" ;;
+    esac
+}
+
 pushd OpenXR-SDK
 cmake -B build -DCMAKE_BUILD_TYPE=Release
 if [ $(uname -s) = 'Darwin' ]; then
     NCORE=$(sysctl -n hw.ncpu)
     LIB_EXT=dylib
+    ARCH_DIR=$(darwin_arch_dir)
+    mkdir -p "$ARCH_DIR"
 else
     NCORE=$(nproc)
     LIB_EXT=so
@@ -41,7 +51,7 @@ else
 fi
 cmake --build build -j$NCORE --config Release
 if [ $(uname -s) = 'Darwin' ]; then
-    cp build/src/loader/libopenxr_loader.* ..
+    cp build/src/loader/libopenxr_loader.* "../$ARCH_DIR"/
 else
     cp build/src/loader/libopenxr_loader.* "../$ARCH_DIR"/
 fi
